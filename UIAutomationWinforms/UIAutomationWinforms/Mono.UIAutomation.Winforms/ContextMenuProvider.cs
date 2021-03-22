@@ -39,9 +39,7 @@ namespace Mono.UIAutomation.Winforms
 	[MapsComponent (typeof (SWF.ContextMenu))]
 	internal class ContextMenuProvider : MenuProvider, IRawElementProviderFragmentRoot
 	{
-		private SWF.ContextMenu contextMenu;
-
-		public static void HandleContextMenuPopup (object sender, EventArgs e)
+		public static void HandlePopup (object sender, EventArgs e)
 		{
 			var menu = (SWF.ContextMenu) sender;
 			var menuProvider = (ContextMenuProvider) ProviderFactory.GetProvider (menu);
@@ -49,7 +47,7 @@ namespace Mono.UIAutomation.Winforms
 			srcControlProvider.AddChildProvider (menuProvider);
 		}
 
-		public static void HandleContextMenuCollapse (object sender, EventArgs e)
+		public static void HandleCollapse (object sender, EventArgs e)
 		{
 			var menu = (SWF.ContextMenu) sender;
 			var menuProvider = (ContextMenuProvider) ProviderFactory.FindProvider (menu);
@@ -65,7 +63,6 @@ namespace Mono.UIAutomation.Winforms
 		public ContextMenuProvider (SWF.ContextMenu contextMenu) :
 			base (contextMenu)
 		{
-			this.contextMenu = contextMenu;
 		}
 
 		protected override object GetProviderPropertyValue (int propertyId)
@@ -81,11 +78,11 @@ namespace Mono.UIAutomation.Winforms
 
 		protected override Rect BoundingRectangleProperty {
 			get {
-				if (contextMenu.Wnd == null)
+				if (ContextMenu.Wnd == null)
 					return System.Windows.Rect.Empty;
-				System.Drawing.Rectangle rect = contextMenu.Rect;
+				System.Drawing.Rectangle rect = ContextMenu.Rect;
 				rect.Y -= rect.Height;
-				return Helper.RectangleToRect (contextMenu.Wnd.RectangleToScreen (rect));
+				return Helper.RectangleToRect (ContextMenu.Wnd.RectangleToScreen (rect));
 			}
 		}
 
@@ -103,12 +100,18 @@ namespace Mono.UIAutomation.Winforms
 			AutomationInteropProvider.RaiseAutomationEvent (this, args);
 			base.Terminate ();
 		}
+
+		protected SWF.ContextMenu ContextMenu {
+			get {
+				return (SWF.ContextMenu)Component;
+			}
+		}
 		
 		#region MenuProvider Overrides
 
 		protected override SWF.Menu Menu {
 			get {
-				return contextMenu;
+				return ContextMenu;
 			}
 		}
 

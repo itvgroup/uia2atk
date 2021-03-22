@@ -562,6 +562,7 @@
     <Compile Include="Mono.UIAutomation.Winforms\MapsComponentAttribute.cs" />
     <Compile Include="Mono.UIAutomation.Winforms\MaskedTextBoxProvider.cs" />
     <Compile Include="Mono.UIAutomation.Winforms\MenuItemProvider.cs" />
+    <Compile Include="Mono.UIAutomation.Winforms\MenusListener.cs" />
     <Compile Include="Mono.UIAutomation.Winforms\MenuStripProvider.cs" />
     <Compile Include="Mono.UIAutomation.Winforms\MessageBoxFormProvider.cs" />
     <Compile Include="Mono.UIAutomation.Winforms\MonthCalendarDataGridProvider.cs" />

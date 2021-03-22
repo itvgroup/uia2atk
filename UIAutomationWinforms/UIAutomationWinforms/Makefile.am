@@ -557,6 +557,7 @@ FILES =  \
 	Mono.UIAutomation.Winforms/MapsComponentAttribute.cs \
 	Mono.UIAutomation.Winforms/MaskedTextBoxProvider.cs \
 	Mono.UIAutomation.Winforms/MenuItemProvider.cs \
+	Mono.UIAutomation.Winforms/MenusListener.cs \
 	Mono.UIAutomation.Winforms/MenuStripProvider.cs \
 	Mono.UIAutomation.Winforms/MessageBoxFormProvider.cs \
 	Mono.UIAutomation.Winforms/MonthCalendarDataGridProvider.cs \

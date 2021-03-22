@@ -41,15 +41,14 @@ namespace Mono.UIAutomation.Winforms
 	[MapsComponent (typeof (ContextMenuStrip))]
 	internal class ContextMenuStripProvider : ToolStripProvider
 	{
-		public static void HandleContextMenuStripOpened (object sender, EventArgs e)
+		public static void HandleOpened (object sender, EventArgs e)
 		{
 			var contextMenuStrip = (ContextMenuStrip) sender;
 			var contextMenuStripProvider = (FragmentControlProvider) ProviderFactory.GetProvider (contextMenuStrip);
-
 			GetParentProvider (contextMenuStrip).AddChildProvider (contextMenuStripProvider);
 		}
 
-		public static void HandleContextMenuStripClosed (object sender, EventArgs e)
+		public static void HandleClosed (object sender, EventArgs e)
 		{
 			var contextMenuStrip = (ContextMenuStrip) sender;
 			var contextMenuStripProvider = (FragmentControlProvider) ProviderFactory.FindProvider (contextMenuStrip);
@@ -65,7 +64,7 @@ namespace Mono.UIAutomation.Winforms
 
 		private static FragmentControlProvider GetParentProvider (ContextMenuStrip contextMenuStrip)
 		{
-			var control = contextMenuStrip.SourceControl ?? contextMenuStrip.AssociatedControl;
+			var control = contextMenuStrip.SourceControl;
 			
 			if (control == null) {
 				var ownerItem = contextMenuStrip.OwnerItem;

@@ -49,6 +49,7 @@ namespace Mono.UIAutomation.Winforms
 			ToolTipListener.Initialize ();
 			HelpProviderListener.Initialize ();
 			ErrorProviderListener.Initialize ();
+			MenusListener.Initialize ();
 		}
 
 		/// <summary>

@@ -102,6 +102,8 @@ namespace Mono.UIAutomation.Winforms
 			menuItem.UIACheckedChanged += OnBehaviorChanged;
 			menuItem.UIARadioCheckChanged += OnBehaviorChanged;
 			menuItem.MenuChanged += OnMenuChanged;
+			menuItem.Tracker.ShowSubPopupEvent += OnShowSubPopupEvent;
+			menuItem.Tracker.HideSubPopupEvent += OnHideSubPopupEvent;
 			
 			bounds = MenuItemHelper.GetBounds (menuItem);
 
@@ -115,8 +117,9 @@ namespace Mono.UIAutomation.Winforms
 			menuItem.UIACheckedChanged -= OnBehaviorChanged;
 			menuItem.UIARadioCheckChanged -= OnBehaviorChanged;
 			menuItem.MenuChanged -= OnMenuChanged;
+			menuItem.Tracker.ShowSubPopupEvent -= OnShowSubPopupEvent;
+			menuItem.Tracker.HideSubPopupEvent -= OnHideSubPopupEvent;
 		}
-
 		
 		protected override void InitializeChildControlStructure ()
 		{
@@ -227,6 +230,16 @@ namespace Mono.UIAutomation.Winforms
 				             null);
 		}
 
+		private void OnShowSubPopupEvent (object sender, SWF.MenuTracker.SubPopupEventArgs args)
+		{
+			UpdateVisibilityRecursive ();
+		}
+
+		private void OnHideSubPopupEvent (object sender, SWF.MenuTracker.SubPopupEventArgs args)
+		{
+			UpdateVisibilityRecursive ();
+		}
+
 		#endregion
 	}
 
@@ -247,6 +260,11 @@ namespace Mono.UIAutomation.Winforms
 			else if (propertyId == AEIds.NameProperty.Id)
 				return menuItem.Text;
 			return base.GetProviderPropertyValue (propertyId);
+		}
+
+		internal override bool IsReallyVisible ()
+		{
+			return menuItem.IsOpened;
 		}
 		
 		#region MenuProvider Overrides

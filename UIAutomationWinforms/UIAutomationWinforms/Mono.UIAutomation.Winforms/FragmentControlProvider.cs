@@ -39,7 +39,7 @@ using System.Threading;
 
 namespace Mono.UIAutomation.Winforms
 {
-	internal abstract partial class FragmentControlProvider
+	internal abstract class FragmentControlProvider
 		: SimpleControlProvider, IRawElementProviderFragment
 	{
 		enum ReallyVisible
@@ -73,32 +73,33 @@ namespace Mono.UIAutomation.Winforms
 				Control.ContextMenuChanged += HandleContextMenuChanged;
 				Control.ContextMenuStripChanged += HandleContextMenuStripChanged;
 				Control.Click += TrackControlClick;
-
-				HandleContextMenuChanged (null, EventArgs.Empty);
-				HandleContextMenuStripChanged (null, EventArgs.Empty);
-			}
-		}
-		
-		private static void HandleContextMenuStripChanged (object sender, EventArgs e)
-		{
-			var menu = (sender as SWF.Control)?.ContextMenuStrip;
-			if (menu != null) {
-				menu.Opened -= ContextMenuStripProvider.HandleContextMenuStripOpened;
-				menu.Opened += ContextMenuStripProvider.HandleContextMenuStripOpened;
-				menu.Closed -= ContextMenuStripProvider.HandleContextMenuStripClosed;
-				menu.Closed += ContextMenuStripProvider.HandleContextMenuStripClosed;
+				SubscribeToContextMenuVisibility (Control);
+				SubscribeToContextMenuStripVisibility (Control);
 			}
 		}
 
 		private static void HandleContextMenuChanged (object sender, EventArgs e)
 		{
-			var menu = (sender as SWF.Control)?.ContextMenu;
-			if (menu != null) {
-				menu.Popup -= ContextMenuProvider.HandleContextMenuPopup;
-				menu.Popup += ContextMenuProvider.HandleContextMenuPopup;
-				menu.Collapse -= ContextMenuProvider.HandleContextMenuCollapse;
-				menu.Collapse += ContextMenuProvider.HandleContextMenuCollapse;
-			}
+			SubscribeToContextMenuVisibility (sender as SWF.Control);
+		}
+
+		private static void HandleContextMenuStripChanged (object sender, EventArgs e)
+		{
+			SubscribeToContextMenuStripVisibility (sender as SWF.Control);
+		}
+
+		private static void SubscribeToContextMenuVisibility (SWF.Control menuOwner)
+		{
+			var menu = menuOwner?.ContextMenu;
+			if (menu != null)
+				MenusListener.SubscribeToContextMenuVisibility (menu);
+		}
+
+		private static void SubscribeToContextMenuStripVisibility (SWF.Control menuOwner)
+		{
+			var menu = menuOwner?.ContextMenuStrip;
+			if (menu != null)
+				MenusListener.SubscribeToContextMenuStripVisibility (menu);
 		}
 
 		void TrackControlClick (object sender, EventArgs e)
@@ -334,14 +335,14 @@ namespace Mono.UIAutomation.Winforms
 			HandleChildComponentRemoved (args.Control);
 		}
 
-		private static void OnControlVisibleChanged (object sender, EventArgs args)
+		private static void OnComponentVisibleChanged (object sender, EventArgs args)
 		{
-			var control = (SWF.Control) sender;
-			var provider = (FragmentControlProvider) ProviderFactory.FindProvider (control);
+			var component = (Component) sender;
+			var provider = (FragmentControlProvider) ProviderFactory.FindProvider (component);
 			provider?.UpdateVisibilityRecursive ();
 		}
 		
-		private void UpdateVisibilityRecursive ()
+		protected void UpdateVisibilityRecursive ()
 		{
 			InvalidateReallyVisible ();
 			if (IsReallyVisible ()) {
@@ -358,10 +359,10 @@ namespace Mono.UIAutomation.Winforms
 
 		protected void HandleChildComponentAdded (Component childComponent)
 		{
-			if (childComponent is SWF.Control childCcontrol) {
-				if (Mono.UIAutomation.Winforms.ErrorProvider.InstancesTracker.IsControlFromErrorProvider (childCcontrol))
+			if (childComponent is SWF.Control childControl) {
+				if (Mono.UIAutomation.Winforms.ErrorProvider.InstancesTracker.IsControlFromErrorProvider (childControl))
 					return;
-				childCcontrol.VisibleChanged += OnControlVisibleChanged;
+				childControl.VisibleChanged += OnComponentVisibleChanged;
 			}
 
 			var childProvider = (FragmentControlProvider) ProviderFactory.GetProvider (childComponent);
@@ -370,9 +371,10 @@ namespace Mono.UIAutomation.Winforms
 
 		protected void HandleChildComponentRemoved (Component childComponent)
 		{
-			if (childComponent is SWF.Control childCcontrol)
-				childCcontrol.VisibleChanged -= OnControlVisibleChanged;
-
+			if (childComponent is SWF.Control childControl) {
+				childControl.VisibleChanged -= OnComponentVisibleChanged;
+			}
+			
 			var childProvider = (FragmentControlProvider) ProviderFactory.FindProvider (childComponent);
 			if (childProvider == null) {
 				Log.Error($"[FragmentControlProvider.HandleChildComponentRemoved] no Provider for <{childComponent}>");

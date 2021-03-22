@@ -48,7 +48,6 @@ namespace Mono.UIAutomation.Winforms
 		{
 			this.dropDrownItem = dropDrownItem;
 			itemProviders = new Dictionary<ToolStripItem, FragmentControlProvider> ();
-			
 		}
 
 		#region FragmentRootControlProvider: Specializations
@@ -75,7 +74,14 @@ namespace Mono.UIAutomation.Winforms
 		{
 			dropDrownItem.DropDown.ItemAdded += OnItemAdded;
 			dropDrownItem.DropDown.ItemRemoved += OnItemRemoved;
-		
+			dropDrownItem.DropDown.Opened += OnOpened;
+			dropDrownItem.DropDown.Closed += OnClosed;
+
+			TryToAddAllChildren ();
+		}
+
+		private void TryToAddAllChildren ()
+		{
 			foreach (ToolStripItem item in dropDrownItem.DropDownItems) {
 				FragmentControlProvider itemProvider = GetItemProvider (item);
 				if (itemProvider != null)
@@ -87,6 +93,8 @@ namespace Mono.UIAutomation.Winforms
 		{
 			dropDrownItem.DropDown.ItemAdded -= OnItemAdded;
 			dropDrownItem.DropDown.ItemRemoved -= OnItemRemoved;
+			dropDrownItem.DropDown.Opened -= OnOpened;
+			dropDrownItem.DropDown.Closed -= OnClosed;
 			
 			foreach (FragmentControlProvider itemProvider in itemProviders.Values)
 				RemoveChildProvider (itemProvider);
@@ -97,6 +105,10 @@ namespace Mono.UIAutomation.Winforms
 
 		#region Private Navigation Methods
 
+		internal override bool IsReallyVisible ()
+		{
+			return dropDrownItem.Visible;
+		}
 
 		private void OnItemAdded (object sender, ToolStripItemEventArgs e)
 		{
@@ -115,6 +127,15 @@ namespace Mono.UIAutomation.Winforms
 			}
 		}
 
+		private void OnOpened (object sender, EventArgs e)
+		{
+			UpdateVisibilityRecursive ();
+		}
+
+		private void OnClosed (object sender, EventArgs e)
+		{
+			UpdateVisibilityRecursive ();
+		}
 
 		private FragmentControlProvider GetItemProvider (ToolStripItem item)
 		{
